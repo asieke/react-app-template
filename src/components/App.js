@@ -1,12 +1,29 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { startGame, cancelGame } from '../actions/settings';
-import Instructions from './Instructions'
+import { fetchNewDeck } from '../actions/deck';
+import fetchStates from '../reducers/fetchStates';
+import Instructions from './Instructions';
+
 
 class App extends Component{
 
+  startGame = () => {
+    this.props.startGame();
+    this.props.fetchNewDeck();
+  }
+
   render() {
     console.log('this',this);
+
+    if (this.props.fetchState === fetchStates.error){
+      return(
+        <div>
+          <h3>Error occured, please refresh</h3>
+          <p>{this.props.message}</p>
+        </div>
+      )
+    }
       return(
         <div>
           <h2>♥ ♠ Evens or Odds ♠ ♥</h2>
@@ -21,7 +38,7 @@ class App extends Component{
               <div>
                 <h3>A new game awaits</h3>
                 <br />
-                <button onClick={this.props.startGame}>Start Game</button>
+                <button onClick={this.startGame}>Start Game</button>
                 <hr />
                 <Instructions />
               </div>                    
@@ -33,18 +50,25 @@ class App extends Component{
 }
 
 const mapStateToProps = state => {
+  const { gameStarted } = state.settings;
+  const { fetchState, message } = state.deck;
+
   return { 
-    gameStarted: state.gameStarted 
+    gameStarted, fetchState, message 
   };
 }
 
-const mapDispatchToProps = dispatch => {
-  return {
-    startGame: () => dispatch(startGame()),
-    cancelGame: () => dispatch(cancelGame())
-  };
-}
+// const mapDispatchToProps = dispatch => {
+//   return {
+//     startGame: () => dispatch(startGame()),
+//     cancelGame: () => dispatch(cancelGame()),
+//     fetchNewDeck: () => dispatch(fetchNewDeck())
+//   };
+// }
 
-const componentConnector = connect(mapStateToProps, mapDispatchToProps);
+const componentConnector = connect(
+  mapStateToProps, 
+  { startGame, cancelGame, fetchNewDeck }
+);
 
 export default componentConnector(App);
